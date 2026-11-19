@@ -67,3 +67,31 @@ module "prod" {
   location            = var.location
   vnet_name           = "vnet-${var.workload}-prod-${local.region_short[var.location]}"
 }
+
+resource "azurerm_virtual_network_peering" "hub_to_dev" {
+  name                      = "peer-hub-to-dev"
+  resource_group_name       = azurerm_resource_group.rg["hub"].name
+  virtual_network_name      = module.hub.vnet_name
+  remote_virtual_network_id = module.dev.vnet_id
+}
+
+resource "azurerm_virtual_network_peering" "dev_to_hub" {
+  name                      = "peer-dev-to-hub"
+  resource_group_name       = azurerm_resource_group.rg["dev"].name
+  virtual_network_name      = module.dev.vnet_name
+  remote_virtual_network_id = module.hub.vnet_id
+}
+
+resource "azurerm_virtual_network_peering" "hub_to_prod" {
+  name                      = "peer-hub-to-prod"
+  resource_group_name       = azurerm_resource_group.rg["hub"].name
+  virtual_network_name      = module.hub.vnet_name
+  remote_virtual_network_id = module.prod.vnet_id
+}
+
+resource "azurerm_virtual_network_peering" "prod_to_hub" {
+  name                      = "peer-prod-to-hub"
+  resource_group_name       = azurerm_resource_group.rg["prod"].name
+  virtual_network_name      = module.prod.vnet_name
+  remote_virtual_network_id = module.hub.vnet_id
+}
