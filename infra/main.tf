@@ -21,6 +21,14 @@ locals {
       KeyVaultSubnet = "10.2.3.0/24"
     }
   }
+  prod_network = {
+    address_space = ["10.3.0.0/16"]
+    subnets = {
+      WebSubnet      = "10.3.1.0/24"
+      DBSubnet       = "10.3.2.0/24"
+      KeyVaultSubnet = "10.3.3.0/24"
+    }
+  }
 }
 
 resource "azurerm_resource_group" "rg" {
@@ -48,4 +56,14 @@ module "dev" {
   address_space       = local.dev_network.address_space
   location            = var.location
   vnet_name           = "vnet-${var.workload}-dev-${local.region_short[var.location]}"
+}
+
+module "prod" {
+  source              = "./modules/spoke"
+  subnets             = local.prod_network.subnets
+  resource_group_name = azurerm_resource_group.rg["prod"].name
+  tags                = merge(var.tags, { environment = "prod" })
+  address_space       = local.prod_network.address_space
+  location            = var.location
+  vnet_name           = "vnet-${var.workload}-prod-${local.region_short[var.location]}"
 }
